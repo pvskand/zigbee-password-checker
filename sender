@@ -1,0 +1,178 @@
+/********SENDER'S END'**********/
+
+// We'll use SoftwareSerial to communicate with the XBee:
+#include <SoftwareSerial.h>
+
+SoftwareSerial XBee(2, 3); // RX, TX
+#include <Keypad.h> // Library for the Keypad
+
+char keys[4][4] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'#','0','*','D'}
+};
+byte rowPins[4] = {6, 7, 8, 9}; 
+byte colPins[4] = {10, 11,12,13}; 
+
+Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, 4, 4 );
+
+
+
+
+void setup()
+{
+  XBee.begin(9600);
+  Serial.begin(9600);
+}
+
+/* A function in update password to send the current password to the coordinator node*/
+
+void checkPassword()
+{
+  int i;
+  char input[4];
+  for(i=0;i<4;)
+  {
+    char store = keypad.getKey();
+    if(store != NO_KEY)
+    {
+      input[i]=store;
+      Serial.print(input[i]);
+      i++;
+    }
+  }
+
+  int pass[4];
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=input[i]-48;
+  }
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=9-pass[i];
+  }
+  if(i==4)
+  {
+  Serial.println();
+  }
+
+  for(i=0;i<4;i++)
+  {
+    XBee.write(pass[i]+48);
+  }
+}
+
+/*A function that send the updated password to the coordinator so the coordinator can update the password*/
+void updatePassword()
+{
+  int i;
+  char input[4];
+  for(i=0;i<4;)
+  {
+    char store = keypad.getKey();
+    if(store != NO_KEY)
+    {
+      input[i]=store;
+      Serial.print(input[i]);
+      i++;
+    }
+  }
+
+  int pass[4];
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=input[i]-48;
+  }
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=9-pass[i];
+  }
+  if(i==4)
+  {
+    Serial.println();
+  }
+
+  for(i=0;i<4;i++)
+  {
+    XBee.write(pass[i]+48);
+  }
+}
+
+
+void loop()
+{
+  int i;
+  char input[4];
+  for(i=0;i<4;)
+  {
+    char store = keypad.getKey(); // get the element typed on the keypad
+    if(store != NO_KEY)
+    {
+      input[i]=store;
+      Serial.print(input[i]);
+      i++;
+    }
+  }
+
+  int pass[4];
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=input[i]-48;
+  }
+
+  for(i=0;i<4;i++)
+  {
+    pass[i]=9-pass[i];
+  }
+  if(i==4)
+  {
+    Serial.println();
+  }
+
+  for(i=0;i<4;i++)
+  {
+    XBee.write(pass[i]+48);
+  }
+
+  {
+    delay(100);
+    char ss = XBee.read();
+    if(ss == 'Y') // correct password entered! Door lock opens!
+    {
+      Serial.println("Password correct !");  
+    }
+    else if(ss == 'C')  // update password
+    {
+      delay(100);
+      Serial.println("Enter Current Password!");
+      checkPassword();
+      delay(100);
+      char u = XBee.read();
+      if(u == 'D')  // correct current password has been entered.
+      {
+        Serial.println("Enter the new Password!");
+        updatePassword();
+        delay(100);
+        char p = XBee.read();
+        if(p == 'U')
+        {
+          Serial.println("Updated Password!");
+        }
+      }
+      else  // wrong password!
+        Serial.println("Wrong password. Try Again!");
+    }
+    else 
+    {
+      Serial.println("Wrong password. Try Again !");
+    }
+  }
+  
+}
+
