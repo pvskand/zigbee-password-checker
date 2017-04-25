@@ -6,6 +6,7 @@
 SoftwareSerial XBee(2, 3); // RX, TX
 #include <Keypad.h> // Library for the Keypad
 
+int passwordLength = 4;
 char keys[4][4] = {
   {'1','2','3','A'},
   {'4','5','6','B'},
@@ -31,35 +32,35 @@ void setup()
 void checkPassword()
 {
   int i;
-  char input[4];
-  for(i=0;i<4;)
+  char input[passwordLength];
+  for(i=0;i<passwordLength;)
   {
     char store = keypad.getKey();
     if(store != NO_KEY)
     {
       input[i]=store;
-      Serial.print(input[i]);
+      Serial.print("*");
       i++;
     }
   }
 
-  int pass[4];
+  int pass[passwordLength];
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=input[i]-48;
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=9-pass[i];
   }
-  if(i==4)
+  if(i==passwordLength)
   {
   Serial.println();
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     XBee.write(pass[i]+48);
   }
@@ -69,35 +70,35 @@ void checkPassword()
 void updatePassword()
 {
   int i;
-  char input[4];
-  for(i=0;i<4;)
+  char input[passwordLength];
+  for(i=0;i<passwordLength;)
   {
     char store = keypad.getKey();
     if(store != NO_KEY)
     {
       input[i]=store;
-      Serial.print(input[i]);
+      Serial.print("*");
       i++;
     }
   }
 
-  int pass[4];
+  int pass[passwordLength];
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=input[i]-48;
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=9-pass[i];
   }
-  if(i==4)
+  if(i==passwordLength)
   {
     Serial.println();
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     XBee.write(pass[i]+48);
   }
@@ -107,35 +108,35 @@ void updatePassword()
 void loop()
 {
   int i;
-  char input[4];
-  for(i=0;i<4;)
+  char input[passwordLength];
+  for(i=0;i<passwordLength;)
   {
     char store = keypad.getKey(); // get the element typed on the keypad
     if(store != NO_KEY)
     {
       input[i]=store;
-      Serial.print(input[i]);
+      Serial.print("*");
       i++;
     }
   }
 
-  int pass[4];
+  int pass[passwordLength];
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=input[i]-48;
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     pass[i]=9-pass[i];
   }
-  if(i==4)
+  if(i==passwordLength)
   {
     Serial.println();
   }
 
-  for(i=0;i<4;i++)
+  for(i=0;i<passwordLength;i++)
   {
     XBee.write(pass[i]+48);
   }
