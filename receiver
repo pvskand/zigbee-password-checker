@@ -1,0 +1,107 @@
+/*********************************RECEIVER'S END********************************/
+// We'll use SoftwareSerial to communicate with the XBee:
+#include <SoftwareSerial.h>
+SoftwareSerial XBee(2, 3); // RX, TX
+
+
+
+void setup()
+{
+
+  XBee.begin(9600);
+  Serial.begin(9600);
+}
+
+int current[]={1,2,3,4};
+int passwordLength = sizeof(current)/sizeof(int);
+int numWrongs = 0;
+void loop()
+{
+  int i;
+  int pass[passwordLength];
+ 
+ for(i=0;i<passwordLength;)
+  {
+    if(XBee.available())
+    {
+      pass[i]=XBee.read()-48;
+      
+      Serial.print(pass[i]);
+      i++;
+    }
+  }
+  Serial.println();
+  for(i=0;i<passwordLength;i++)
+  {
+    pass[i]=9-pass[i];
+    Serial.print(pass[i]);
+  }
+  Serial.println();
+  int j;
+  int correct = 1;
+  for(j=0;j<passwordLength;j++)
+  {
+    if(pass[j] != current[j])
+      correct = 0;
+  }
+  if(correct == 1)  // CHECK THE ENTERED PASSWORD
+  {
+    Serial.write("Password Correct !!!");
+     XBee.write('Y');
+    
+  }
+  else if(pass[0]==17 && pass[1]==18 && pass[2]==19 && pass[3]==20)   // CHECK IF THE COMMAND IS TO UPDATE
+  {
+    Serial.write("Password change occurring!!!");
+    XBee.write('C');
+
+    for(i=0;i<passwordLength;)
+    {
+      if(XBee.available())
+      {
+        pass[i]=XBee.read()-48;
+        i++;
+      }
+    }
+  for(i=0;i<passwordLength;i++)
+  {
+    pass[i]=9-pass[i];
+  }
+  int correct1 = 1;
+  for(j=0;j<passwordLength;j++)
+  {
+    if(pass[j] != current[j])
+      correct1 = 0;
+  }
+  if(correct1 == 1)
+    {
+      XBee.write('D');  // UPDATE
+
+      for(i=0;i<passwordLength;)
+      {
+        if(XBee.available())
+        {
+          pass[i]=XBee.read()-48;
+          i++;
+        }
+      }
+      for(i=0;i<passwordLength;i++)
+      {
+        current[i]=9-pass[i];
+      }
+      Serial.print("Password updated !!!");
+      XBee.write('U');
+    }
+    else
+    {
+      XBee.write('E');
+    }
+  }
+  else
+  {
+    numWrongs++;
+    Serial.write ("Wrong Password Enter Again!!!");
+    XBee.write('N');
+  }
+  Serial.println();
+}
